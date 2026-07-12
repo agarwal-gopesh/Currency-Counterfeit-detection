@@ -1,0 +1,4 @@
+[core]
+    remote = currency-local-storage
+['remote "currency-local-storage"']
+    url = /Users/gopesh/dvc_local_storage
