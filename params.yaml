@@ -1,3 +1,14 @@
 make_dataset:
   test_split: 0.2
   seed: 42
+
+train:
+  img_size: 224
+  batch_size: 32
+  phase1_epochs: 10
+  phase1_lr: 0.001
+  phase1_patience: 3
+  phase2_epochs: 7
+  phase2_lr: 0.00001
+  phase2_patience: 3
+  phase2_unfreeze_last: 30

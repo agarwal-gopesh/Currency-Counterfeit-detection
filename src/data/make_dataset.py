@@ -5,6 +5,8 @@ import sys
 import mlflow
 from sklearn.model_selection import train_test_split
 
+VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
+
 
 def load_params():
     root = Path(__file__).resolve().parents[2]
@@ -26,6 +28,9 @@ def scan_raw_data(raw_data_path):
             denomination = denom_dir.name
 
             for img_path in denom_dir.glob("*.*"):
+                if img_path.suffix.lower() not in VALID_EXTENSIONS:
+                    continue
+
                 rows.append({
                     "image_path": str(img_path.relative_to(raw_data_path.parents[0])),
                     "authenticity": authenticity,

@@ -1,6 +1,6 @@
 stages:
   make_dataset:
-    cmd: python src/data/make_dataset.py data/raw
+    cmd: python3 src/data/make_dataset.py data/raw
     deps:
       - src/data/make_dataset.py
       - data/raw
@@ -10,3 +10,25 @@ stages:
     outs:
       - data/processed/train.csv
       - data/processed/test.csv
+
+  train:
+    cmd: python3 -u src/models/train_model.py
+    deps:
+      - src/models/train_model.py
+      - data/processed/train.csv
+      - data/processed/test.csv
+    params:
+      - train.img_size
+      - train.batch_size
+      - train.phase1_epochs
+      - train.phase1_lr
+      - train.phase1_patience
+      - train.phase2_epochs
+      - train.phase2_lr
+      - train.phase2_patience
+      - train.phase2_unfreeze_last
+    outs:
+      - artifacts/models/multi_output_model.keras
+    plots:
+      - reports/figures/confusion_matrix_authenticity.png
+      - reports/figures/confusion_matrix_denomination.png

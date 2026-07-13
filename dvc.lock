@@ -1,17 +1,17 @@
 schema: '2.0'
 stages:
   make_dataset:
-    cmd: python src/data/make_dataset.py data/raw
+    cmd: python3 src/data/make_dataset.py data/raw
     deps:
     - path: data/raw
       hash: md5
-      md5: 1b2b357ac4248ba80ca02a2d3356c8ec.dir
-      size: 7646509924
-      nfiles: 7045
+      md5: 261e3689e284057b69f052f4eff1f522.dir
+      size: 7646377020
+      nfiles: 7043
     - path: src/data/make_dataset.py
       hash: md5
-      md5: 7ac52a83a4e904da38bce5fe37b6f085
-      size: 2175
+      md5: adee714cf90d0118a17148ae8e7200d3
+      size: 2344
     params:
       params.yaml:
         make_dataset.seed: 42
@@ -19,9 +19,9 @@ stages:
     outs:
     - path: data/processed/test.csv
       hash: md5
-      md5: 593e5caffc28b760e2a755b6ed557f67
-      size: 82968
+      md5: df1a6aa4d2826e589688b40b9a6d8aee
+      size: 83085
     - path: data/processed/train.csv
       hash: md5
-      md5: 2aba2e227b5b7b527ae33db334e3c957
-      size: 332261
+      md5: f6429e3a41dcae1a75aa7fd71d3209ee
+      size: 332050
