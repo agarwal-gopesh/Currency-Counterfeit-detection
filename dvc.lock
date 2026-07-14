@@ -25,3 +25,26 @@ stages:
       hash: md5
       md5: f6429e3a41dcae1a75aa7fd71d3209ee
       size: 332050
+  predict:
+    cmd: python3 src/models/predict.py
+    deps:
+    - path: artifacts/models/multi_output_model.keras
+      hash: md5
+      md5: 42657b1481edf76b2294227b7198d720
+      size: 24049681
+    - path: src/models/predict.py
+      hash: md5
+      md5: 5f12f8a9e9886825c31714719e0f1de4
+      size: 2674
+    params:
+      params.yaml:
+        predict.image_path: data/raw/real/10/1.jpg
+        predict.model_path: artifacts/models/multi_output_model.keras
+        predict.output_dir: reports/predictions
+        train.img_size: 224
+    outs:
+    - path: reports/predictions
+      hash: md5
+      md5: 445c1f766f74adb2e9e9e22ae72cbffc.dir
+      size: 131
+      nfiles: 1

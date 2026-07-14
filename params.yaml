@@ -12,3 +12,8 @@ train:
   phase2_lr: 0.00001
   phase2_patience: 3
   phase2_unfreeze_last: 30
+
+predict:
+  model_path: artifacts/models/multi_output_model.keras
+  image_path: data/raw/real/10/1.jpg
+  output_dir: reports/predictions

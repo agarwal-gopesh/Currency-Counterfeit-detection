@@ -11,3 +11,16 @@ stages:
     - data/processed/train.csv
     - data/processed/test.csv
 
+  predict:
+    cmd: python3 src/models/predict.py
+    deps:
+    - src/models/predict.py
+    - artifacts/models/multi_output_model.keras
+    params:
+    - predict.model_path
+    - predict.image_path
+    - predict.output_dir
+    - train.img_size
+    outs:
+    - reports/predictions
+
