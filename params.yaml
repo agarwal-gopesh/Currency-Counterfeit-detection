@@ -15,5 +15,5 @@ train:
 
 predict:
   model_path: artifacts/models/multi_output_model.keras
-  image_path: data/raw/real/10/1.jpg
+  image_path: fake1.jpeg
   output_dir: reports/predictions

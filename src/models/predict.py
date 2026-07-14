@@ -1,7 +1,45 @@
 from pathlib import Path
 import json
 import yaml
+import numpy as np
+import easyocr
 import tensorflow as tf
+
+FAKE_NOTE_KEYWORDS = [
+    "SPECIMEN", "COPY", "PLAY MONEY", "PROP",
+    "PROP MONEY", "MOTION PICTURE",
+    "FOR MOTION PICTURE USE", "MOVIE MONEY",
+    "REPLICA", "SAMPLE", "FACSIMILE", "IMITATION",
+    "NOVELTY", "TOY", "FUN", "FUNNY", "CHILDREN",
+    "KIDS", "EDUCATIONAL", "NOT LEGAL TENDER",
+    "MONOPOLY", "MANORANJAN", "ENTERTAINMENT",
+    "COUPON", "VOUCHER", "DEMO", "TEST",
+    "PRACTICE", "TRAINING", "GIFT",
+    "PROMOTIONAL", "ADVERTISEMENT",
+]
+
+REAL_NOTE_KEYWORDS = [
+    "RESERVE", "BANK", "INDIA",
+    "RESERVE BANK", "RESERVE BANK OF INDIA", "RBI",
+    "भारत", "भारतीय", "रिज़र्व", "बैंक",
+    "₹", "RUPEES", "RUPEE", "GOVERNOR",
+    "GUARANTEED", "PROMISE", "PAY", "MAHATMA",
+    "GANDHI", "सत्यमेव", "JAYATE", "SATYAMEVA",
+    "BHARAT",
+]
+
+REAL_KEYWORD_THRESHOLD = 3
+
+_ocr_reader = None
+
+
+def get_ocr_reader():
+    global _ocr_reader
+    if _ocr_reader is None:
+        _ocr_reader = easyocr.Reader(
+            ["en", "hi"], gpu=False
+        )
+    return _ocr_reader
 
 
 def load_params():
@@ -36,17 +74,62 @@ def preprocess_image(image_input, img_size=224):
     return img
 
 
-def predict(model, image):
+def ocr_detect(image_input):
+    """Run OCR on image, return extracted text."""
+    reader = get_ocr_reader()
+    if isinstance(image_input, bytes):
+        import io
+        from PIL import Image
+        img = Image.open(io.BytesIO(image_input))
+        img = np.array(img)
+    else:
+        img = str(image_input)
+    results = reader.readtext(img, detail=0)
+    return " ".join(results).upper()
+
+
+def check_fake_keywords(text):
+    """Return True if any fake keyword found."""
+    for kw in FAKE_NOTE_KEYWORDS:
+        if kw.upper() in text:
+            return True, kw
+    return False, None
+
+
+def check_real_keywords(text):
+    """Return count of real keywords found."""
+    count = 0
+    for kw in REAL_NOTE_KEYWORDS:
+        if kw.upper() in text:
+            count += 1
+    return count
+
+
+def predict(model, image, image_input=None):
+    """Full prediction pipeline: OCR check then model."""
+    # --- Step 1: OCR keyword check ---
+    if image_input is not None:
+        text = ocr_detect(image_input)
+        is_fake, kw = check_fake_keywords(text)
+        if is_fake:
+            return 0, 1.0, f"OCR: fake keyword '{kw}' found"
+
+        real_count = check_real_keywords(text)
+        if real_count <= REAL_KEYWORD_THRESHOLD:
+            return 0, 1.0, (
+                f"OCR: only {real_count} real keywords "
+                f"(need > {REAL_KEYWORD_THRESHOLD})"
+            )
+
+    # --- Step 2: Model prediction ---
     auth_pred, _ = model.predict(image, verbose=0)
-
     auth_idx = int(auth_pred[0] > 0.5)
-
     if auth_idx == 1:
         auth_confidence = float(auth_pred[0])
     else:
         auth_confidence = float(1 - auth_pred[0])
 
-    return auth_idx, auth_confidence
+    return auth_idx, auth_confidence, "Model prediction"
 
 
 def main():
@@ -76,12 +159,13 @@ def main():
 
     model = load_saved_model(model_path)
     image = preprocess_image(image_path, img_size)
-    auth_idx, auth_conf = predict(model, image)
+    auth_idx, auth_conf, source = predict(model, image, image_path)
 
     result = {
         "image": str(image_path),
         "authenticity": AUTH_CLASSES[auth_idx],
         "confidence": round(auth_conf, 4),
+        "source": source,
     }
 
     print("\n===== PREDICTION =====")

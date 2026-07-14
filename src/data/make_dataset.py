@@ -2,7 +2,7 @@ from pathlib import Path
 import yaml
 import pandas as pd
 import sys
-import mlflow
+# import mlflow
 from sklearn.model_selection import train_test_split
 
 VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
@@ -65,17 +65,17 @@ def main():
 
     df = scan_raw_data(raw_data_path)
 
-    mlflow.set_experiment("make_dataset")
+    # mlflow.set_experiment("make_dataset")
 
-    with mlflow.start_run():
-        mlflow.log_param("test_split", params["test_split"])
-        mlflow.log_param("seed", params["seed"])
-        mlflow.log_param("total_images", len(df))
+    # with mlflow.start_run():
+    #     mlflow.log_param("test_split", params["test_split"])
+    #     mlflow.log_param("seed", params["seed"])
+    #     mlflow.log_param("total_images", len(df))
 
-        train, test = split_data(df, params["test_split"], params["seed"])
+    train, test = split_data(df, params["test_split"], params["seed"])
 
-        mlflow.log_metric("train_size", len(train))
-        mlflow.log_metric("test_size", len(test))
+    #     mlflow.log_metric("train_size", len(train))
+    #     mlflow.log_metric("test_size", len(test))
 
     save_data(train, test, root / "data" / "processed")
 
