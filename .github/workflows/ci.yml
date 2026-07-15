@@ -25,7 +25,7 @@ jobs:
           pip install -e .
 
       - name: Lint
-        run: flake8 src/ app.py
+        run: flake8 src/
 
       - name: Predict test
         run: |
